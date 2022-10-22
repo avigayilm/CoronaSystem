@@ -7,6 +7,9 @@ namespace CoronaSystem.Models
         [Key]
        public int PersonId { get; set; }
         [Required]
+        public string MyId { get; set; }
+       
+        [Required]
         public string FirstName { get; set; }
         [Required]
         public string LastName { get; set; }

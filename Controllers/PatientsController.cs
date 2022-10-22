@@ -10,22 +10,53 @@ using CoronaSystem.Models;
 
 namespace CoronaSystem.Controllers
 {
-    public class PatientController : Controller
+    public class PatientsController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public PatientController(ApplicationDbContext context)
+        public PatientsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Patient
+        // GET: Patients
         public async Task<IActionResult> Index()
         {
               return View(await _context.Person.ToListAsync());
         }
+        [HttpPost]
+        public JsonResult AutoComplete(string Prefix)
+        {
+            //Note : you can bind same list from database  
 
-        // GET: Patient/Details/5
+            //Searching records from list using LINQ query  
+            var Context = (from N in _context.Person
+                           where N.MyId.Contains(Prefix)
+                           select new
+                           {
+                               label = N.MyId,
+                               val = N.FirstName
+                           }).ToList();
+            return Json(Context);
+        }
+
+        [HttpPost]
+        public ActionResult Index(string Id)
+        {
+            try
+            {
+                Person person = _context.Person
+   .Where(e => e.MyId == Id).FirstOrDefault();
+                return RedirectToAction("Details", "Patients", new { id = person.PersonId });
+            }
+            catch(Exception ex)
+            {
+                throw (ex);
+            }
+           
+        }
+
+        // GET: Patients/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Person == null)
@@ -43,18 +74,18 @@ namespace CoronaSystem.Controllers
             return View(person);
         }
 
-        // GET: Patient/Create
+        // GET: Patients/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Patient/Create
+        // POST: Patients/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PersonId,FirstName,LastName,Adress,PhoneNumber,CellPhoneNumber,BirthDate,FirstShot,SecondShot,ThirdShot,FourthShot,Vaccine1,Vaccine2,Vaccine3,Vaccine4,PositiveDate,NegativeDate")] Person person)
+        public async Task<IActionResult> Create([Bind("PersonId,MyId,FirstName,LastName,Adress,PhoneNumber,CellPhoneNumber,BirthDate,FirstShot,SecondShot,ThirdShot,FourthShot,Vaccine1,Vaccine2,Vaccine3,Vaccine4,PositiveDate,NegativeDate")] Person person)
         {
             if (ModelState.IsValid)
             {
@@ -65,7 +96,7 @@ namespace CoronaSystem.Controllers
             return View(person);
         }
 
-        // GET: Patient/Edit/5
+        // GET: Patients/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Person == null)
@@ -81,12 +112,12 @@ namespace CoronaSystem.Controllers
             return View(person);
         }
 
-        // POST: Patient/Edit/5
+        // POST: Patients/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PersonId,FirstName,LastName,Adress,PhoneNumber,CellPhoneNumber,BirthDate,FirstShot,SecondShot,ThirdShot,FourthShot,Vaccine1,Vaccine2,Vaccine3,Vaccine4,PositiveDate,NegativeDate")] Person person)
+        public async Task<IActionResult> Edit(int id, [Bind("PersonId,MyId,FirstName,LastName,Adress,PhoneNumber,CellPhoneNumber,BirthDate,FirstShot,SecondShot,ThirdShot,FourthShot,Vaccine1,Vaccine2,Vaccine3,Vaccine4,PositiveDate,NegativeDate")] Person person)
         {
             if (id != person.PersonId)
             {
@@ -116,7 +147,7 @@ namespace CoronaSystem.Controllers
             return View(person);
         }
 
-        // GET: Patient/Delete/5
+        // GET: Patients/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Person == null)
@@ -134,7 +165,7 @@ namespace CoronaSystem.Controllers
             return View(person);
         }
 
-        // POST: Patient/Delete/5
+        // POST: Patients/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
